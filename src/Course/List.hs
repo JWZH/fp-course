@@ -232,12 +232,8 @@ flattenAgain = flatMap id
 seqOptional ::
   List (Optional a)
   -> Optional (List a)
-seqOptional = foldLeft f (Full Nil)
-  where
-    f (Full acc) (Full a) = Full (acc ++ a:.Nil)
-    f Empty _ = Empty
-    f _ Empty = Empty
-
+seqOptional = 
+  foldRight (twiceOptional (:.)) (Full Nil)
 -- | Find the first element in the list matching the predicate.
 --
 -- >>> find even (1 :. 3 :. 5 :. Nil)
@@ -258,10 +254,10 @@ find ::
   (a -> Bool)
   -> List a
   -> Optional a
-find f = foldLeft f' Empty
-  where
-    f' b a = b <+> g a
-    g a = if f a then Full a else Empty
+find p x =
+  case filter p x of 
+    Nil -> Empty
+    h:._ -> Full h
 
 -- | Determine if the length of the given list is greater than 4.
 --
